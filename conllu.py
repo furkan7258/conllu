@@ -13,7 +13,7 @@ class Token:
     def __str__(self):
         return self.form
 
-metadata_pattern = re.compile(r'#\s*(\S+)\s*=\s*(.+)$')
+metadata_pattern = re.compile(r'^#\s*(\S+)\s*=\s*(.*)$')
 token_pattern = re.compile(r'(?:.+\t){9}(?:.+)$')
 id_pattern = re.compile(r'^\d+(?:-\d+)?$')
 
@@ -54,10 +54,9 @@ class Sentence:
                 feats = None
                 if feats_str != '_':
                     feats = {}
-                    if '|' in feats_str:
-                        for feat in feats_str.split('|'):
-                            key, value = feat.split('=')
-                            feats[key] = value
+                    for feat in feats_str.split('|'):
+                        key, value = feat.split('=', 1)
+                        feats[key] = value
                 token = Token(id, form, lemma, upos, xpos, feats, head, deprel, deps, misc)
                 self.tokens[id] = token
         for token in self.tokens.values():
@@ -95,7 +94,7 @@ class Sentence:
             conllu += f'{id}\t{form}\t{lemma}\t{upos}\t{xpos}\t'
             feats = '_'
             if token.feats:
-                feats_sorted_d = dict(sorted(token.feats.items(), key=lambda x: x[0]))
+                feats_sorted_d = dict(sorted(token.feats.items(), key=lambda x: x[0].lower()))
                 feats = '|'.join([f'{key}={value}' for key, value in feats_sorted_d.items()])
             conllu += f'{feats}\t'
             head = '_'
